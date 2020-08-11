@@ -5,11 +5,10 @@
 #include <iostream>
 #include <pqxx/pqxx>
 #include <fstream>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 #include "Credentials.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-
 
 using namespace std;
 
@@ -41,51 +40,61 @@ public:
     }
 };
 
-class DBConfigurator : public Credentials {
+class DBConfigurator : public Credentials
+{
 public:
-   
-    void setHost(string hostFromConfig) {
+    void setHost(string hostFromConfig)
+    {
         host = hostFromConfig;
     }
 
-    void setPort(string portFromConfig) {
+    void setPort(string portFromConfig)
+    {
         port = portFromConfig;
     }
 
-    void setUser(string userFromConfig) {
+    void setUser(string userFromConfig)
+    {
         user = userFromConfig;
     }
 
-    void setPassword(string passwdFromConfig) {
+    void setPassword(string passwdFromConfig)
+    {
         password = passwdFromConfig;
     }
 
-    void setDatabase(string DBFromConfig) {
+    void setDatabase(string DBFromConfig)
+    {
         database = DBFromConfig;
     }
 
-    string getHost() {
+    string getHost()
+    {
         return host;
     }
 
-    string getPort() {
+    string getPort()
+    {
         return port;
-
     }
 
-    string getUser() {
+    string getUser()
+    {
         return user;
     }
 
-    string getPassword() {
+    string getPassword()
+    {
         return password;
     }
 
-    string getDatabase() {
+    string getDatabase()
+    {
         return database;
     }
 
-    void configParser() {
+    void configParser()
+    {
         boost::property_tree::ptree pt;
         boost::property_tree::ini_parser::read_ini("db_config.ini", pt);
 
@@ -122,27 +131,27 @@ public:
     //                //incomplete
     //                string parameter = i.substr(3, string::npos);
     //            }
-    //            
+    //
     //            //temp
     //            //cout << "parameter: " << parameter << endl;
     //        }
     //    }
-    //    
+    //
     //}
-          
 };
-
 
 int main()
 {
     Bank bank;
     DBConfigurator psqlConf;
     int option;
-    
-    if (std::filesystem::exists("db_config.ini")) {
+
+    if (boost::filesystem::exists("db_config.ini"))
+    {
         psqlConf.configParser();
     }
-    else {
+    else
+    {
         cout << "Couldn't open file db_config.ini" << endl;
         return 1;
     }
@@ -166,7 +175,7 @@ int main()
         // temp
         // C.disconnect();
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         cerr << e.what() << endl;
         return 1;
