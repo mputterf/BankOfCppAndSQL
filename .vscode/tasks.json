@@ -14,7 +14,7 @@
 				"-lboost_system",
 				"-lboost_filesystem",
 				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}-mac"
+				"${fileDirname}/${fileBasenameNoExtension}"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
@@ -26,6 +26,29 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"type": "shell",
+			"label": "C/C++: g++ build active file",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-g",
+				"-std=c++17",
+				"${file}",
+				"-lpqxx",
+				"-lpq",
+				"-lboost_system",
+				"-lboost_filesystem",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
 		}
 	]
 }
