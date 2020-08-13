@@ -12,11 +12,45 @@
 
 using namespace std;
 
+class Bank;
+class DBConfigurator;
+
 class Bank
 {
 public:
+ 
+    int openConnection(string host, string port, string database, string user, string password) {
+        string connection_string("host=" + host + " port=" + port + " dbname=" + database + " user=" + user + " password=" + password);
+
+        pqxx::connection C(connection_string.c_str());
+
+        pqxx::work wrk(C);
+
+        try
+        {
+            if (C.is_open())
+            {
+                cout << "Open connection to database " << C.dbname() << " successful" << endl;
+            }
+            else
+            {
+                cout << "Failed to open database" << endl;
+                return 1;
+            }
+
+        }
+        catch (const std::exception& e)
+        {
+            cerr << e.what() << endl;
+            return 1;
+        }
+
+        return 0;
+    }
+
     void returnAccounts()
     {
+        
         cout << "temp" << endl;
     }
 
@@ -104,51 +138,56 @@ public:
         setPassword(pt.get<std::string>("General.password"));
         setDatabase(pt.get<std::string>("General.database"));
 
-        //cout << getHost() << endl;
-        /*std::cout << pt.get<std::string>("General.host") << std::endl;
-        std::cout << pt.get<std::string>("General.port") << std::endl;*/
     }
 
-    //void configParser() {
-    //    vector<string> config;
-    //    string line;
-    //    ifstream postgresConfig;
-
-    //    postgresConfig.open("db_config.txt", ios::in);
-
-    //    while (!postgresConfig.eof()) {
-    //        getline(postgresConfig, line);
-    //        config.push_back(line);
-    //    }
-
-    //    for (auto i : config) {
-    //        //Thank you stack overflow. Search through each element of the string vector for a substring.
-    //        //In this case find our config keywords so we can set the appropiate variables for psql access.
-    //        if (find_if(config.begin(), config.end(), [](const string& str) { return str.find("host") != string::npos; } ) != config.end()) {
-    //            //substring search and either return not "host =" or position 3 (should be the hostname)
-    //            size_t equal = i.find("=");
-    //            if (equal != string::npos) {
-    //                //incomplete
-    //                string parameter = i.substr(3, string::npos);
-    //            }
-    //
-    //            //temp
-    //            //cout << "parameter: " << parameter << endl;
-    //        }
-    //    }
-    //
-    //}
 };
 
 int main()
 {
-    Bank bank;
-    DBConfigurator psqlConf;
+    
     int option;
 
     if (boost::filesystem::exists("db_config.ini"))
     {
+        
+        Bank bank;
+        DBConfigurator psqlConf;
+
         psqlConf.configParser();
+        bank.openConnection(psqlConf.getHost(), psqlConf.getPort(), psqlConf.getDatabase(), psqlConf.getUser(), psqlConf.getPassword());
+       
+
+        cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
+        do
+        {
+            cout << "Please select and option." << endl;
+            cout << "0. Quit." << endl;
+            cout << "1. Get bank accounts." << endl;
+            cout << "2. Create account." << endl;
+
+            cin >> option;
+
+            switch (option)
+            {
+            case 0:
+                cout << "Goodbye." << endl;
+                break;
+
+            case 1:
+                bank.returnAccounts();
+                break;
+
+            case 2:
+                bank.createAccount();
+                break;
+
+            default:
+                cout << "Invalid option. Please try again." << endl;
+                break;
+            }
+        } while (option != 0);
+
+
     }
     else
     {
@@ -156,60 +195,6 @@ int main()
         return 1;
     }
 
-    string connection_string("host=" + psqlConf.getHost() + " port=" + psqlConf.getPort() + " dbname=" + psqlConf.getDatabase() + " user=" + psqlConf.getUser() + " password=" + psqlConf.getPassword());
-
-    pqxx::connection C(connection_string.c_str());
-
-    try
-    {
-        if (C.is_open())
-        {
-            cout << "Open connection to database " << C.dbname() << " successful" << endl;
-        }
-        else
-        {
-            cout << "Failed to open database" << endl;
-            return 1;
-        }
-
-        // temp
-        // C.disconnect();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << e.what() << endl;
-        return 1;
-    }
-
-    cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
-    do
-    {
-        cout << "Please select and option." << endl;
-        cout << "0. Quit." << endl;
-        cout << "1. Get bank accounts." << endl;
-        cout << "2. Create account." << endl;
-
-        cin >> option;
-
-        switch (option)
-        {
-        case 0:
-            cout << "Goodbye." << endl;
-            break;
-
-        case 1:
-            bank.returnAccounts();
-            break;
-
-        case 2:
-            bank.createAccount();
-            break;
-
-        default:
-            cout << "Invalid option. Please try again." << endl;
-            break;
-        }
-    } while (option != 0);
-
+    
     return 0;
 }
