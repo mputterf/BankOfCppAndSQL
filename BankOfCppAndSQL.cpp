@@ -19,12 +19,14 @@ class Bank
 {
 public:
  
-    int openConnection(string host, string port, string database, string user, string password) {
+    pqxx::connection openConnection(string host, string port, string database, string user, string password) {
+
         string connection_string("host=" + host + " port=" + port + " dbname=" + database + " user=" + user + " password=" + password);
 
         pqxx::connection C(connection_string.c_str());
 
-        pqxx::work wrk(C);
+        //Would like for this to be outside here. Need to figure out if possible.
+        //pqxx::work W(C);
 
         try
         {
@@ -35,23 +37,40 @@ public:
             else
             {
                 cout << "Failed to open database" << endl;
-                return 1;
+                //should probably not be returning the connection if it failed, but I don't know what else
+                //to return right now and get build errors in VS 2019 if it's a return with nothing
+                return C;
             }
 
         }
         catch (const std::exception& e)
         {
             cerr << e.what() << endl;
-            return 1;
+            //Same as stated above.
+            return C;
         }
 
-        return 0;
+        return C;
     }
 
-    void returnAccounts()
+    void returnAccounts(pqxx::connection& C)
     {
-        
-        cout << "temp" << endl;
+        //temp string to test read from database
+        string sql = "SELECT * FROM testTable";
+
+        pqxx::nontransaction N(C);
+
+        pqxx::result R(N.exec(sql.c_str()));
+
+        //temp to test read from database
+        //this for loop is from postgreSQL's website
+        for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i) {
+            cout << "ID = " << i[0].as<int>() << endl;
+            cout << "word = " << i[1].as<string>() << endl;
+        }
+
+
+        //cout << "temp" << endl;
     }
 
     void createAccount()
@@ -154,7 +173,7 @@ int main()
         DBConfigurator psqlConf;
 
         psqlConf.configParser();
-        bank.openConnection(psqlConf.getHost(), psqlConf.getPort(), psqlConf.getDatabase(), psqlConf.getUser(), psqlConf.getPassword());
+        pqxx::connection C = bank.openConnection(psqlConf.getHost(), psqlConf.getPort(), psqlConf.getDatabase(), psqlConf.getUser(), psqlConf.getPassword());
        
 
         cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
@@ -174,7 +193,7 @@ int main()
                 break;
 
             case 1:
-                bank.returnAccounts();
+                bank.returnAccounts(C);
                 break;
 
             case 2:
