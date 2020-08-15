@@ -24,10 +24,7 @@ public:
         string connection_string("host=" + host + " port=" + port + " dbname=" + database + " user=" + user + " password=" + password);
 
         pqxx::connection C(connection_string.c_str());
-
-        //Would like for this to be outside here. Need to figure out if possible.
-        //pqxx::work W(C);
-
+        
         try
         {
             if (C.is_open())
@@ -56,7 +53,7 @@ public:
     void returnAccounts(pqxx::connection& C)
     {
         //temp string to test read from database
-        string sql = "SELECT * FROM testTable";
+        string sql = "SELECT * FROM accounts";
 
         pqxx::nontransaction N(C);
 
@@ -66,30 +63,42 @@ public:
         //this for loop is from postgreSQL's website
         for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i) {
             cout << "ID = " << i[0].as<int>() << endl;
-            cout << "word = " << i[1].as<string>() << endl;
+            cout << "Last Name = " << i[1].as<string>() << endl;
+            cout << "First Name = " << i[2].as<string>() << endl;
+            cout << "Amount = " << i[3].as<string>() << endl;
+
         }
 
 
         //cout << "temp" << endl;
     }
 
-    void createAccount()
+    void createAccount(pqxx::connection& C)
     {
-        string name, address;
+        string lastName, firstName;
         double amount;
 
-        cout << "Please enter the account holder's name:" << endl;
-        cin >> name;
-        cout << "Please enter account holder's address:" << endl;
-        cin >> address;
+        //Create bank account table if it doesn't exist
+        string sql = "CREATE TABLE IF NOT EXISTS accounts (id SERIAL PRIMARY KEY NOT NULL, last_name VARCHAR, first_name VARCHAR, amount NUMERIC(12, 2));";
+        pqxx::nontransaction N(C);
+        N.exec(sql.c_str());
+
+        cout << "Please enter the account last holder's name:" << endl;
+        cin >> lastName;
+        cout << "Please enter the account last holder's name:" << endl;
+        cin >> firstName;
         cout << "Please enter an initial deposit ammount" << endl;
         cin >> amount;
 
-        // temp
-        cout << "Name: " + name << endl;
-        cout << "Address: " + address << endl;
-        // cout doesn't work well with floats. Use printf and format to 2 decimal points
-        printf("Amount in account: %.2f\n", amount);
+        //pqxx::work W(C);
+        sql = "INSERT INTO accounts(last_name, first_name, amount) VALUES (' " + lastName + "', '" + firstName + "', " + to_string(amount) + ");";
+        N.exec(sql.c_str());
+
+        //Fails when trying to use pqxx::work. Tutorial on postgreSQL's site used pqxx::work and pqxx::in same function, but differnt order. Maybe that's it
+        //possible work around https://stackoverflow.com/questions/26464056/pqxx-reuse-reactivate-a-work-transaction
+        //W.exec(sql.c_str());
+        //W.commit();
+
     }
 };
 
@@ -174,8 +183,7 @@ int main()
 
         psqlConf.configParser();
         pqxx::connection C = bank.openConnection(psqlConf.getHost(), psqlConf.getPort(), psqlConf.getDatabase(), psqlConf.getUser(), psqlConf.getPassword());
-       
-
+        
         cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
         do
         {
@@ -197,7 +205,7 @@ int main()
                 break;
 
             case 2:
-                bank.createAccount();
+                bank.createAccount(C);
                 break;
 
             default:
