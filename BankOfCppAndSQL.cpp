@@ -12,31 +12,93 @@
 
 using namespace std;
 
+class Bank;
+class DBConfigurator;
+
 class Bank
 {
 public:
-    void returnAccounts()
-    {
-        cout << "temp" << endl;
+ 
+    pqxx::connection openConnection(string host, string port, string database, string user, string password) {
+
+        string connection_string("host=" + host + " port=" + port + " dbname=" + database + " user=" + user + " password=" + password);
+
+        pqxx::connection C(connection_string.c_str());
+        
+        try
+        {
+            if (C.is_open())
+            {
+                cout << "Open connection to database " << C.dbname() << " successful" << endl;
+            }
+            else
+            {
+                cout << "Failed to open database" << endl;
+                //should probably not be returning the connection if it failed, but I don't know what else
+                //to return right now and get build errors in VS 2019 if it's a return with nothing
+                return C;
+            }
+
+        }
+        catch (const std::exception& e)
+        {
+            cerr << e.what() << endl;
+            //Same as stated above.
+            return C;
+        }
+
+        return C;
     }
 
-    void createAccount()
+    void returnAccounts(pqxx::connection& C)
     {
-        string name, address;
+        //temp string to test read from database
+        string sql = "SELECT * FROM accounts";
+
+        pqxx::nontransaction N(C);
+
+        pqxx::result R(N.exec(sql.c_str()));
+
+        //temp to test read from database
+        //this for loop is from postgreSQL's website
+        for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i) {
+            cout << "ID = " << i[0].as<int>() << endl;
+            cout << "Last Name = " << i[1].as<string>() << endl;
+            cout << "First Name = " << i[2].as<string>() << endl;
+            cout << "Amount = " << i[3].as<string>() << endl;
+
+        }
+
+
+        //cout << "temp" << endl;
+    }
+
+    void createAccount(pqxx::connection& C)
+    {
+        string lastName, firstName;
         double amount;
 
-        cout << "Please enter the account holder's name:" << endl;
-        cin >> name;
-        cout << "Please enter account holder's address:" << endl;
-        cin >> address;
+        //Create bank account table if it doesn't exist
+        string sql = "CREATE TABLE IF NOT EXISTS accounts (id SERIAL PRIMARY KEY NOT NULL, last_name VARCHAR, first_name VARCHAR, amount NUMERIC(12, 2));";
+        pqxx::nontransaction N(C);
+        N.exec(sql.c_str());
+
+        cout << "Please enter the account last holder's name:" << endl;
+        cin >> lastName;
+        cout << "Please enter the account last holder's name:" << endl;
+        cin >> firstName;
         cout << "Please enter an initial deposit ammount" << endl;
         cin >> amount;
 
-        // temp
-        cout << "Name: " + name << endl;
-        cout << "Address: " + address << endl;
-        // cout doesn't work well with floats. Use printf and format to 2 decimal points
-        printf("Amount in account: %.2f\n", amount);
+        //pqxx::work W(C);
+        sql = "INSERT INTO accounts(last_name, first_name, amount) VALUES (' " + lastName + "', '" + firstName + "', " + to_string(amount) + ");";
+        N.exec(sql.c_str());
+
+        //Fails when trying to use pqxx::work. Tutorial on postgreSQL's site used pqxx::work and pqxx::in same function, but differnt order. Maybe that's it
+        //possible work around https://stackoverflow.com/questions/26464056/pqxx-reuse-reactivate-a-work-transaction
+        //W.exec(sql.c_str());
+        //W.commit();
+
     }
 };
 
@@ -104,51 +166,55 @@ public:
         setPassword(pt.get<std::string>("General.password"));
         setDatabase(pt.get<std::string>("General.database"));
 
-        //cout << getHost() << endl;
-        /*std::cout << pt.get<std::string>("General.host") << std::endl;
-        std::cout << pt.get<std::string>("General.port") << std::endl;*/
     }
 
-    //void configParser() {
-    //    vector<string> config;
-    //    string line;
-    //    ifstream postgresConfig;
-
-    //    postgresConfig.open("db_config.txt", ios::in);
-
-    //    while (!postgresConfig.eof()) {
-    //        getline(postgresConfig, line);
-    //        config.push_back(line);
-    //    }
-
-    //    for (auto i : config) {
-    //        //Thank you stack overflow. Search through each element of the string vector for a substring.
-    //        //In this case find our config keywords so we can set the appropiate variables for psql access.
-    //        if (find_if(config.begin(), config.end(), [](const string& str) { return str.find("host") != string::npos; } ) != config.end()) {
-    //            //substring search and either return not "host =" or position 3 (should be the hostname)
-    //            size_t equal = i.find("=");
-    //            if (equal != string::npos) {
-    //                //incomplete
-    //                string parameter = i.substr(3, string::npos);
-    //            }
-    //
-    //            //temp
-    //            //cout << "parameter: " << parameter << endl;
-    //        }
-    //    }
-    //
-    //}
 };
 
 int main()
 {
-    Bank bank;
-    DBConfigurator psqlConf;
+    
     int option;
 
     if (boost::filesystem::exists("db_config.ini"))
     {
+        
+        Bank bank;
+        DBConfigurator psqlConf;
+
         psqlConf.configParser();
+        pqxx::connection C = bank.openConnection(psqlConf.getHost(), psqlConf.getPort(), psqlConf.getDatabase(), psqlConf.getUser(), psqlConf.getPassword());
+        
+        cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
+        do
+        {
+            cout << "Please select and option." << endl;
+            cout << "0. Quit." << endl;
+            cout << "1. Get bank accounts." << endl;
+            cout << "2. Create account." << endl;
+
+            cin >> option;
+
+            switch (option)
+            {
+            case 0:
+                cout << "Goodbye." << endl;
+                break;
+
+            case 1:
+                bank.returnAccounts(C);
+                break;
+
+            case 2:
+                bank.createAccount(C);
+                break;
+
+            default:
+                cout << "Invalid option. Please try again." << endl;
+                break;
+            }
+        } while (option != 0);
+
+
     }
     else
     {
@@ -156,60 +222,6 @@ int main()
         return 1;
     }
 
-    string connection_string("host=" + psqlConf.getHost() + " port=" + psqlConf.getPort() + " dbname=" + psqlConf.getDatabase() + " user=" + psqlConf.getUser() + " password=" + psqlConf.getPassword());
-
-    pqxx::connection C(connection_string.c_str());
-
-    try
-    {
-        if (C.is_open())
-        {
-            cout << "Open connection to database " << C.dbname() << " successful" << endl;
-        }
-        else
-        {
-            cout << "Failed to open database" << endl;
-            return 1;
-        }
-
-        // temp
-        // C.disconnect();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << e.what() << endl;
-        return 1;
-    }
-
-    cout << "Hello and welcome to the Bank of C++ and SQL." << endl;
-    do
-    {
-        cout << "Please select and option." << endl;
-        cout << "0. Quit." << endl;
-        cout << "1. Get bank accounts." << endl;
-        cout << "2. Create account." << endl;
-
-        cin >> option;
-
-        switch (option)
-        {
-        case 0:
-            cout << "Goodbye." << endl;
-            break;
-
-        case 1:
-            bank.returnAccounts();
-            break;
-
-        case 2:
-            bank.createAccount();
-            break;
-
-        default:
-            cout << "Invalid option. Please try again." << endl;
-            break;
-        }
-    } while (option != 0);
-
+    
     return 0;
 }
