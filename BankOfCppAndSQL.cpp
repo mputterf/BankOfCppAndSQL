@@ -53,17 +53,16 @@ public:
 
     void returnAccounts(pqxx::connection &C)
     {
-        //temp string to test read from database
+        //Get the bank accounts from database
         string sql = "SELECT * FROM accounts";
 
         pqxx::nontransaction N(C);
-
-        // pqxx::result R(N.exec(sql.c_str()));
 
         try
         {
             pqxx::result R(N.exec(sql.c_str()));
 
+            // If there is an empty table, return a message saying so instead of nothing
             if (R.empty())
             {
                 cout << "There are no accounts in the bank." << endl;
@@ -83,21 +82,6 @@ public:
         {
             std::cerr << e.what() << std::endl;
         }
-
-        // if (R.empty())
-        // {
-        //     cout << "There are no accounts in the bank." << endl;
-        // }
-
-        // //temp to test read from database
-        // //this for loop is from postgreSQL's website
-        // for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
-        // {
-        //     cout << "ID = " << i[0].as<int>() << endl;
-        //     cout << "Last Name = " << i[1].as<string>() << endl;
-        //     cout << "First Name = " << i[2].as<string>() << endl;
-        //     cout << "Amount = " << i[3].as<string>() << endl;
-        // }
     }
 
     void createAccount(pqxx::connection &C)
