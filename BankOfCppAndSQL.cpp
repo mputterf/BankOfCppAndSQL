@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <pqxx/pqxx>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -70,12 +71,19 @@ public:
 
             //temp to test read from database
             //this for loop is from postgreSQL's website
+            // for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
+            // {
+            //     cout << "ID = " << i[0].as<int>() << endl;
+            //     cout << "Last Name = " << i[1].as<string>() << endl;
+            //     cout << "First Name = " << i[2].as<string>() << endl;
+            //     cout << "Amount = " << i[3].as<string>() << endl;
+            // }
+
+            // Considering tabulate for a better table output
+            cout << "ID" << setw(15) << "Last Name" << setw(15) << "First Name" << setw(15) << "Balance" << endl;
             for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
             {
-                cout << "ID = " << i[0].as<int>() << endl;
-                cout << "Last Name = " << i[1].as<string>() << endl;
-                cout << "First Name = " << i[2].as<string>() << endl;
-                cout << "Amount = " << i[3].as<string>() << endl;
+                cout << i[0].as<int>() << setw(15) << i[1].as<string>() << setw(15) << i[2].as<string>() << setw(15) << i[3].as<string>() << endl;
             }
         }
         catch (const pqxx::undefined_table &e)
@@ -109,6 +117,31 @@ public:
         //possible work around https://stackoverflow.com/questions/26464056/pqxx-reuse-reactivate-a-work-transaction
         //W.exec(sql.c_str());
         //W.commit();
+    }
+
+    void deposit(pqxx::connection &C)
+    {
+        cout << "temp" << endl;
+    }
+
+    void withdraw(pqxx::connection &C)
+    {
+        cout << "temp" << endl;
+    }
+
+    void viewBalance(pqxx::connection &C)
+    {
+        cout << "temp" << endl;
+    }
+
+    void modifyAccount(pqxx::connection &C)
+    {
+        cout << "temp" << endl;
+    }
+
+    void deleteAccount(pqxx::connection &C)
+    {
+        cout << "temp" << endl;
     }
 };
 
@@ -199,6 +232,11 @@ int main()
             cout << "0. Quit." << endl;
             cout << "1. Get bank accounts." << endl;
             cout << "2. Create account." << endl;
+            cout << "3. Deposit." << endl;
+            cout << "4. Withdraw." << endl;
+            cout << "5. View balance of an account" << endl;
+            cout << "6. Modify an account." << endl;
+            cout << "7. Delete an account." << endl;
 
             cin >> option;
 
@@ -214,6 +252,26 @@ int main()
 
             case 2:
                 bank.createAccount(C);
+                break;
+
+            case 3:
+                bank.deposit(C);
+                break;
+
+            case 4:
+                bank.withdraw(C);
+                break;
+
+            case 5:
+                bank.viewBalance(C);
+                break;
+
+            case 6:
+                bank.modifyAccount(C);
+                break;
+
+            case 7:
+                bank.deleteAccount(C);
                 break;
 
             default:
