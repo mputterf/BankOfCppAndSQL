@@ -9,12 +9,37 @@
                 "-g",
                 "-std=c++17",
                 "${file}",
+                "*.o",
                 "-lpqxx",
                 "-lpq",
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "C/C++: g++ build main program",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "-std=c++17",
+                "BankOfCppAndSQL.cpp",
+                "*.o",
+                "-lpqxx",
+                "-lpq",
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-o",
+                "${fileDirname}/BankOfCppAndSQL"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -29,18 +54,38 @@
         },
         {
             "type": "shell",
-            "label": "C/C++: g++ build active file",
+            "label": "Build Bank.o",
             "command": "/usr/bin/g++",
             "args": [
                 "-g",
+                "-c",
                 "-std=c++17",
-                "${file}",
+                "Bank.cpp",
                 "-lpqxx",
                 "-lpq",
-                "-lboost_system",
-                "-lboost_filesystem",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/Bank.o"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "Build DBConfigurator.o",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "-c",
+                "-std=c++17",
+                "DBConfigurator.cpp",
+                "-lboost_system",
+                "-o",
+                "${fileDirname}/DBConfigurator.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
