@@ -1,54 +1,72 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "shell",
-			"label": "C/C++: clang++ build active file",
-			"command": "/usr/bin/clang++",
-			"args": [
-				"-g",
-				"-std=c++17",
-				"${file}",
-				"-lpqxx",
-				"-lpq",
-				"-lboost_system",
-				"-lboost_filesystem",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
-		},
-		{
-			"type": "shell",
-			"label": "C/C++: g++ build active file",
-			"command": "/usr/bin/g++",
-			"args": [
-				"-g",
-				"-std=c++17",
-				"${file}",
-				"-lpqxx",
-				"-lpq",
-				"-lboost_system",
-				"-lboost_filesystem",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
-			],
-			"options": {
-				"cwd": "${workspaceFolder}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": "build"
-		}
-	]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "C/C++: g++ build main program",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "-std=c++17",
+                "BankOfCppAndSQL.cpp",
+                "*.o",
+                "-lpqxx",
+                "-lpq",
+                "-lboost_system",
+                "-lboost_filesystem",
+                "-o",
+                "${fileDirname}/BankOfCppAndSQL"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Build Bank.o",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "-c",
+                "-std=c++17",
+                "Bank.cpp",
+                "-o",
+                "${fileDirname}/Bank.o"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "Build DBConfigurator.o",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "-c",
+                "-std=c++17",
+                "DBConfigurator.cpp",
+                "-o",
+                "${fileDirname}/DBConfigurator.o"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        }
+    ]
 }
