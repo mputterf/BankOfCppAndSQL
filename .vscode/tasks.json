@@ -3,30 +3,6 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "C/C++: clang++ build active file",
-            "command": "/usr/bin/clang++",
-            "args": [
-                "-g",
-                "-std=c++17",
-                "${file}",
-                "*.o",
-                "-lpqxx",
-                "-lpq",
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": "build"
-        },
-        {
-            "type": "shell",
             "label": "C/C++: g++ build main program",
             "command": "/usr/bin/g++",
             "args": [
@@ -61,8 +37,6 @@
                 "-c",
                 "-std=c++17",
                 "Bank.cpp",
-                "-lpqxx",
-                "-lpq",
                 "-o",
                 "${fileDirname}/Bank.o"
             ],
@@ -83,7 +57,6 @@
                 "-c",
                 "-std=c++17",
                 "DBConfigurator.cpp",
-                "-lboost_system",
                 "-o",
                 "${fileDirname}/DBConfigurator.o"
             ],
