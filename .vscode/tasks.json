@@ -9,13 +9,13 @@
                 "-g",
                 "-std=c++17",
                 "BankOfCppAndSQL.cpp",
-                "*.o",
+                "${workspaceFolder}/Releases/*.o",
                 "-lpqxx",
                 "-lpq",
                 "-lboost_system",
                 "-lboost_filesystem",
                 "-o",
-                "${fileDirname}/BankOfCppAndSQL"
+                "${workspaceFolder}/Releases/BankOfCppAndSQL"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -38,7 +38,7 @@
                 "-std=c++17",
                 "Bank.cpp",
                 "-o",
-                "${fileDirname}/Bank.o"
+                "${workspaceFolder}/Releases/Bank.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -58,7 +58,7 @@
                 "-std=c++17",
                 "DBConfigurator.cpp",
                 "-o",
-                "${fileDirname}/DBConfigurator.o"
+                "${workspaceFolder}/Releases/DBConfigurator.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
