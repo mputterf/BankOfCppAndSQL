@@ -92,6 +92,7 @@ public:
         sql = "INSERT INTO accounts(last_name, first_name, amount) VALUES (' " + lastName + "', '" + firstName + "', " + to_string(amount) + ");";
         N.exec(sql.c_str());
 
+        // TODO:
         //Fails when trying to use pqxx::work. Tutorial on postgreSQL's site used pqxx::work and pqxx::in same function, but differnt order. Maybe that's it
         //possible work around https://stackoverflow.com/questions/26464056/pqxx-reuse-reactivate-a-work-transaction
         //W.exec(sql.c_str());
@@ -169,7 +170,81 @@ public:
 
     void withdraw(pqxx::connection &C)
     {
-        cout << "temp" << endl;
+        // TODO:
+        // This is a copy/paste from the deposit code with minor modification.
+        // Might combine the two and use some flag to determine if we are subtracting or adding
+        int id;
+
+        cout << "Please enter the ID of the account you wish to withdraw" << endl;
+        cin >> id;
+
+        string sql = "SELECT * FROM accounts WHERE id=" + to_string(id);
+
+        pqxx::nontransaction N(C);
+
+        try
+        {
+            pqxx::result R(N.exec(sql.c_str()));
+
+            // If there is an empty result, return a message saying so
+            if (R.empty())
+            {
+                cout << "That account does not exist." << endl;
+            }
+
+            // There should only be one record, but not sure how you can read the row from R without itterating through it
+            for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
+            {
+                string yn;
+
+                do
+                {
+                    cout << "Do you wish to withdraw from the account belonging to " << i[2].as<string>() << " " << i[1].as<string>() << " (y/n)?" << endl;
+                    cin >> yn;
+
+                    // Change our read in option to uppercase for comparison
+                    transform(yn.begin(), yn.end(), yn.begin(), ::toupper);
+                } while (yn.compare("Y") != 0 && yn.compare("N") != 0); // I keep thinking this needs to be || but it needs to be &&
+
+                // We should only reach here if the user answered y or n
+                // If confirmed to withdraw, read the amount from the database, add to it, and then update the record in the database
+                if (yn.compare("Y") == 0)
+                {
+                    double withdraw = 0, amount = i[3].as<double>();
+
+                    cout << "How much do you wish to withdraw?" << endl;
+                    cin >> withdraw;
+
+                    amount -= withdraw;
+
+                    if (amount < 0)
+                    {
+                        cout << "Error: Can't have negative balance. Aborting" << endl;
+                        break;
+                    }
+
+                    sql = "UPDATE accounts SET amount = " + to_string(amount) + " WHERE id=" + to_string(id);
+                    pqxx::result R(N.exec(sql.c_str()));
+
+                    // We should only be updating one record so it should be safe to break out of the for loop after it's been updated
+                    if (R.affected_rows() == 1)
+                    {
+                        cout << "Update successful" << endl;
+                        break;
+                    }
+                }
+                // If we're not going to deposit, just break out of the for loop
+                else if (yn.compare("N") == 0)
+                {
+                    cout << "Aborting" << endl;
+                    break;
+                }
+            }
+        }
+        catch (const pqxx::undefined_table &e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }
 
     void viewBalance(pqxx::connection &C)
