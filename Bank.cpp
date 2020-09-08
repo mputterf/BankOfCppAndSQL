@@ -249,7 +249,36 @@ public:
 
     void viewBalance(pqxx::connection &C)
     {
-        cout << "temp" << endl;
+        int id;
+
+        cout << "Please enter the ID of the account you view the balance of." << endl;
+        cin >> id;
+
+        string sql = "SELECT * FROM accounts WHERE id=" + to_string(id);
+
+        pqxx::nontransaction N(C);
+
+        try {
+
+            pqxx::result R(N.exec(sql.c_str()));
+
+            // If there is an empty result, return a message saying so
+            if (R.empty())
+            {
+                cout << "That account does not exist." << endl;
+            }
+
+            // Same as above. Need to consider tabulate for a cleaner outpu
+            cout << "ID" << setw(15) << "Last Name" << setw(15) << "First Name" << setw(15) << "Balance" << endl;
+            for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
+            {
+                cout << i[0].as<int>() << setw(15) << i[1].as<string>() << setw(15) << i[2].as<string>() << setw(15) << i[3].as<double>() << endl;
+            }
+
+        }catch (const pqxx::undefined_table& e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }
 
     void modifyAccount(pqxx::connection &C)

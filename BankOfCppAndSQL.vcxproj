@@ -148,7 +148,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bank.cpp" />
     <ClCompile Include="BankOfCppAndSQL.cpp" />
+    <ClCompile Include="DBConfigurator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Credentials.h" />
