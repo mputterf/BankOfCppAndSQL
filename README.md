@@ -20,6 +20,9 @@ database = bank
 ```
 
 ## How to build
+### Prerequisites
+Please make sure you have `libpq` and `libpqxx` installed. For Linux, they should be in your distro's repository. For Mac, you can install them through brew. For Windows, I recommend visiting this [github](https://github.com/GordonLElliott/Easy-PQXX-Build-for-Windows-Visual-Studio) for an easier time building libpqxx on windows (libpq comes with PostgreSQL)
+
 ### Linux and Mac
 This project was built in vscode. You can select `Run task` in the Terminal menu and `Build DBConfigurator.o`, `Build Bank.o` and then `C/C++: g++ build main program` and hopefully it will build.
 
