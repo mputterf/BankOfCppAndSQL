@@ -258,7 +258,8 @@ public:
 
         pqxx::nontransaction N(C);
 
-        try {
+        try
+        {
 
             pqxx::result R(N.exec(sql.c_str()));
 
@@ -274,8 +275,8 @@ public:
             {
                 cout << i[0].as<int>() << setw(15) << i[1].as<string>() << setw(15) << i[2].as<string>() << setw(15) << i[3].as<double>() << endl;
             }
-
-        }catch (const pqxx::undefined_table& e)
+        }
+        catch (const pqxx::undefined_table &e)
         {
             std::cerr << e.what() << std::endl;
         }
@@ -288,6 +289,66 @@ public:
 
     void deleteAccount(pqxx::connection &C)
     {
-        cout << "temp" << endl;
+        int id;
+
+        cout << "Please enter the ID of the account you wish to delete" << endl;
+        cin >> id;
+
+        string sql = "SELECT * FROM accounts WHERE id=" + to_string(id);
+
+        pqxx::nontransaction N(C);
+
+        try
+        {
+
+            pqxx::result R(N.exec(sql.c_str()));
+
+            // If there is an empty result, return a message saying so
+            if (R.empty())
+            {
+                cout << "That account does not exist." << endl;
+            }
+
+            for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
+            {
+                string yn;
+
+                do
+                {
+                    cout << "Do you wish to delete the account belonging to " << i[2].as<string>() << " " << i[1].as<string>() << " ?" << endl;
+                    cout << "This action can't be undone! (y/n)" << endl;
+                    cin >> yn;
+
+                    // Change our read in option to uppercase for comparison
+                    transform(yn.begin(), yn.end(), yn.begin(), ::toupper);
+                } while (yn.compare("Y") != 0 && yn.compare("N") != 0); // I keep thinking this needs to be || but it needs to be &&
+
+                // We should only reach here if the user answered y or n
+                // If confirmed to withdraw, read the amount from the database, add to it, and then update the record in the database
+                if (yn.compare("Y") == 0)
+                {
+
+                    sql = "DELETE FROM accounts WHERE id=" + to_string(id);
+                    pqxx::result R(N.exec(sql.c_str()));
+
+                    // We should only be updating one record so it should be safe to break out of the for loop after it's been updated
+                    if (R.affected_rows() == 1)
+                    {
+                        cout << "Delete successful" << endl;
+                        break;
+                    }
+                }
+                // If we're not going to deposit, just break out of the for loop
+                else if (yn.compare("N") == 0)
+                {
+                    cout << "Aborting" << endl;
+                    break;
+                }
+            }
+        }
+        catch (const pqxx::undefined_table &e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }
 };
