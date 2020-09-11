@@ -5,18 +5,34 @@
             "type": "shell",
             "label": "C/C++: g++ build main program",
             "command": "/usr/bin/g++",
-            "args": [
-                "-g",
-                "-std=c++17",
-                "BankOfCppAndSQL.cpp",
-                "${workspaceFolder}/Releases/*.o",
-                "-lpqxx",
-                "-lpq",
-                "-lboost_system",
-                "-lboost_filesystem",
-                "-o",
-                "${workspaceFolder}/Releases/BankOfCppAndSQL"
-            ],
+            "linux": {
+                "args": [
+                    "-g",
+                    "-std=c++17",
+                    "BankOfCppAndSQL.cpp",
+                    "${workspaceFolder}/bld/*.o",
+                    "-lpqxx",
+                    "-lpq",
+                    "-lboost_system",
+                    "-lboost_filesystem",
+                    "-o",
+                    "${workspaceFolder}/Releases/Linux/BankOfCppAndSQL-linux"
+                ]
+            },
+            "osx": {
+                "args": [
+                    "-g",
+                    "-std=c++17",
+                    "BankOfCppAndSQL.cpp",
+                    "${workspaceFolder}/bld/*.o",
+                    "-lpqxx",
+                    "-lpq",
+                    "-lboost_system",
+                    "-lboost_filesystem",
+                    "-o",
+                    "${workspaceFolder}/Releases/Mac/BankOfCppAndSQL-mac"
+                ]
+            },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -38,7 +54,7 @@
                 "-std=c++17",
                 "Bank.cpp",
                 "-o",
-                "${workspaceFolder}/Releases/Bank.o"
+                "${workspaceFolder}/bld/Bank.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -58,7 +74,7 @@
                 "-std=c++17",
                 "DBConfigurator.cpp",
                 "-o",
-                "${workspaceFolder}/Releases/DBConfigurator.o"
+                "${workspaceFolder}/bld/DBConfigurator.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
