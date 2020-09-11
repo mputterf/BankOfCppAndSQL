@@ -335,6 +335,16 @@ public:
                 {
                     lastName = newLastName;
                 }
+
+                sql = "UPDATE accounts SET last_name = '" + lastName + "', first_name = '" + firstName + "' WHERE id = " + to_string(id);
+                pqxx::result R(N.exec(sql.c_str()));
+
+                // We should only be updating one record so it should be safe to break out of the for loop after it's been updated
+                if (R.affected_rows() == 1)
+                {
+                    cout << "Update successful" << endl;
+                    break;
+                }
             }
         }
         catch (const pqxx::undefined_table &e)
