@@ -2,6 +2,7 @@
 #include <string>
 #include <pqxx/pqxx>
 #include <iomanip>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace std;
 
@@ -284,7 +285,62 @@ public:
 
     void modifyAccount(pqxx::connection &C)
     {
-        cout << "temp" << endl;
+        int id;
+
+        cout << "Please enter the ID of the account you wish to modify" << endl;
+        cin >> id;
+
+        string sql = "SELECT * FROM accounts WHERE id=" + to_string(id);
+
+        pqxx::nontransaction N(C);
+
+        try
+        {
+
+            pqxx::result R(N.exec(sql.c_str()));
+
+            // If there is an empty result, return a message saying so
+            if (R.empty())
+            {
+                cout << "That account does not exist." << endl;
+            }
+
+            for (pqxx::result::const_iterator i = R.begin(); i != R.end(); ++i)
+            {
+                string lastName = i[1].as<string>();
+                string firstName = i[2].as<string>();
+
+                string newLastName = "";
+                string newFirstName = "";
+
+                cout << "Enter a new FIRST name for the account holder. Leave blank if you do not wish to change." << endl;
+
+                // Use getline() so we can accept an empty string. Since "cin >>" leaves a newline (\n) in the buffer our getline will be ignored.
+                // Use cin.ignore(numeric_limits<streamsize>::max(),'\n') to ignore everything the in the buffer until our newline.
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                getline(cin, newFirstName);
+
+                // Trim the name the user gave. If the string is empty, then we won't reassign the account name.
+                boost::algorithm::trim(newFirstName);
+                if (!newFirstName.empty())
+                {
+                    firstName = newFirstName;
+                }
+
+                cout << "Enter a new LAST name for the account holder. Leave blank if you do not wish to change." << endl;
+                getline(cin, newLastName);
+
+                boost::algorithm::trim(newLastName);
+                if (!newLastName.empty())
+                {
+                    lastName = newLastName;
+                }
+            }
+        }
+        catch (const pqxx::undefined_table &e)
+        {
+            std::cerr << e.what() << std::endl;
+        }
     }
 
     void deleteAccount(pqxx::connection &C)
